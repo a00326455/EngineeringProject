@@ -1,8 +1,10 @@
 package tus.teamproject.app;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
+import tus.teamproject.app.domain.Algorithms;
+import tus.teamproject.app.domain.EncryptionInterface;
+import tus.teamproject.app.factory.EncryptionAlgorithmFactory;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -43,14 +45,25 @@ public class App {
             }
             // Open the properties file
             prop = new Properties();
-            Reader reader = new FileReader("/Users/maheshkanse/Documents/GitHub/EngineeringProject/target/classes/config.properties");
-            prop.load(reader);
-            reader.close();
+//            Reader reader = new FileReader("/Users/maheshkanse/Documents/GitHub/EngineeringProject/target/classes/config.properties");
+//            prop.load(reader);
+//            reader.close();
+
+            if(System.getenv("INPUT_DIR") != null) {
+                prop.setProperty("input_dir", System.getenv("INPUT_DIR"));
+            } else {
+                prop.setProperty("input_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/test_dir");
+            }
+            if(System.getenv("OUTPUT_DIR") != null){
+                prop.setProperty("output_dir", System.getenv("OUTPUT_DIR"));
+            } else {
+                prop.setProperty("output_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/results_dir");
+            }
 
             logger.info("Input: " + prop.getProperty("input_dir"));
             logger.info("Output: " + prop.getProperty("output_dir"));
 
-            perform_tests();
+            walkFiles();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,16 +73,28 @@ public class App {
     }
 
     private void walkFiles() {
-        try (Stream<Path> paths = Files.walk(Paths.get(prop.getProperty("input_dir")))) {
-            paths
-                    .filter(Files::isRegularFile)
-                    .forEach(perform_tests);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        File f = new File(prop.getProperty("input_dir"));
+        File[] files = f.listFiles();
+        if(files != null) {
+            for (File file : files) {
+                perform_tests(file);
+            }
         }
     }
 
-    private void perform_tests() {
-        // TODO
+    private void perform_tests(File path) {
+        String encryptedFilePath = prop.getProperty("output_dir") + "/encrypted_" + path.getName();
+        String decryptedFilePath = prop.getProperty("output_dir") + "/decrypted_" + path.getName();
+        for(Algorithms algo : Algorithms.values()){
+            EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
+            if(processor != null) {
+                logger.info("Encrypting: " + path.toString());
+                processor.encryptFile(path.toString(), encryptedFilePath);
+
+                logger.info("Decrypting: " + encryptedFilePath);
+                processor.decryptFile(encryptedFilePath, decryptedFilePath);
+            }
+        }
     }
+
 }
