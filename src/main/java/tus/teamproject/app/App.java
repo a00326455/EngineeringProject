@@ -6,11 +6,8 @@ import tus.teamproject.app.factory.EncryptionAlgorithmFactory;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.logging.Logger;
-import java.util.stream.Stream;
 
 /**
  * Main Application Class
@@ -18,6 +15,7 @@ import java.util.stream.Stream;
 public class App {
     private final Logger logger = Logger.getLogger(App.class.getName());
     private Properties prop;
+    private BufferedWriter resultWriter;
 
     public static void main(String[] args) {
         App app = new App();
@@ -28,6 +26,7 @@ public class App {
     public App() {
         try {
             logger.info("Started");
+            resultWriter = new BufferedWriter(new FileWriter("report.csv", true));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -65,6 +64,7 @@ public class App {
 
             walkFiles();
 
+            resultWriter.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -76,23 +76,46 @@ public class App {
         File f = new File(prop.getProperty("input_dir"));
         File[] files = f.listFiles();
         if(files != null) {
-            for (File file : files) {
-                perform_tests(file);
+            try {
+                for (File file : files) {
+                    perform_tests(file);
+                }
+            } catch (Exception e){
+                e.printStackTrace();
             }
         }
     }
 
     private void perform_tests(File path) {
-        String encryptedFilePath = prop.getProperty("output_dir") + "/encrypted_" + path.getName();
-        String decryptedFilePath = prop.getProperty("output_dir") + "/decrypted_" + path.getName();
-        for(Algorithms algo : Algorithms.values()){
-            EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
-            if(processor != null) {
-                logger.info("Encrypting: " + path.toString());
-                processor.encryptFile(path.toString(), encryptedFilePath);
 
-                logger.info("Decrypting: " + encryptedFilePath);
-                processor.decryptFile(encryptedFilePath, decryptedFilePath);
+        try{
+            long fileSize = Files.size(path.toPath());
+
+            for(Algorithms algo : Algorithms.values()){
+                String encryptedFilePath = prop.getProperty("output_dir") + "/encrypted_" + algo + "_" + path.getName();
+                String decryptedFilePath = prop.getProperty("output_dir") + "/decrypted_" + algo + "_" + path.getName();
+
+                EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
+                if(processor != null) {
+                    Long startTime = System.currentTimeMillis();
+                    logger.info("Encrypting: " + path.toString());
+                    processor.encryptFile(path.toString(), encryptedFilePath);
+
+                    logger.info("Decrypting: " + encryptedFilePath);
+                    processor.decryptFile(encryptedFilePath, decryptedFilePath);
+                    Long endTime = System.currentTimeMillis();
+
+                    String resultLine = algo + "," + fileSize + "," + (endTime - startTime) + "," + path + "\n";
+                    logger.info(resultLine);
+                    resultWriter.write(resultLine);
+                }
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            try {
+                resultWriter.write("Error,Error,Error" + path + "\n");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
             }
         }
     }

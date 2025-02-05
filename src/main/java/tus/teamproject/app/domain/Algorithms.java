@@ -1,5 +1,5 @@
 package tus.teamproject.app.domain;
 
 public enum Algorithms {
-    AES_GCM
+    AES_GCM,TRIPLE_DES
 }
