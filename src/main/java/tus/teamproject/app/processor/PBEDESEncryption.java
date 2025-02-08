@@ -3,55 +3,49 @@ package tus.teamproject.app.processor;
 import tus.teamproject.app.domain.EncryptionInterface;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.PBEParameterSpec;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 
-public class AESGCMEncryption implements EncryptionInterface {
+public class PBEDESEncryption implements EncryptionInterface {
 
-    private static final String ALGORITHM = "AES/GCM/NoPadding";
-    private static final int KEY_SIZE = 256;
-    private static final int IV_SIZE = 12;
-    private static final int TAG_SIZE = 128;
-    private final SecretKey key;
-    private final byte[] iv;
+    private static final String ALGORITHM = "PBEWithMD5AndDES";
+    private SecretKey key;
+    private PBEParameterSpec paramSpec;
 
-    public AESGCMEncryption(){
-        key = generateKey();
-        iv = generateIV();
-    }
-
-    private SecretKey generateKey() {
-        KeyGenerator keyGen = null;
+    public PBEDESEncryption(){
+        PBEKeySpec keySpec = new PBEKeySpec("test".toCharArray());
+        SecretKeyFactory keyFactory = null;
         try {
-            keyGen = KeyGenerator.getInstance("AES");
-            keyGen.init(KEY_SIZE);
-            return keyGen.generateKey();
-        } catch (NoSuchAlgorithmException e) {
+            keyFactory = SecretKeyFactory.getInstance("PBEWithMD5AndDES");
+            key = keyFactory.generateSecret(keySpec);
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update("input".getBytes());
+            byte[] digest = md.digest();
+            byte[] salt = new byte[8];
+            for (int i = 0; i < 8; ++i)
+                salt[i] = digest[i];
+            paramSpec = new PBEParameterSpec(salt, 20);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
-    }
 
-    private byte[] generateIV() {
-        byte[] iv = new byte[IV_SIZE];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
-        return iv;
     }
 
     public void encryptFile(String inputFilePath, String outputFilePath) {
         try {
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
-            cipher.init(Cipher.ENCRYPT_MODE, key, spec);
+            cipher.init(Cipher.ENCRYPT_MODE, key, paramSpec);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fos.write(iv); // Write IV to the beginning of the file
 
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -73,12 +67,10 @@ public class AESGCMEncryption implements EncryptionInterface {
     public void decryptFile(String inputFilePath, String outputFilePath) {
         try{
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
-            cipher.init(Cipher.DECRYPT_MODE, key, spec);
+            cipher.init(Cipher.DECRYPT_MODE, key, paramSpec);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fis.read(iv); // Read IV from the beginning of the file
 
             byte[] buffer = new byte[1024];
             int bytesRead;

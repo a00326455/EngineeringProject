@@ -1,11 +1,13 @@
 package tus.teamproject.app;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import tus.teamproject.app.domain.Algorithms;
 import tus.teamproject.app.domain.EncryptionInterface;
 import tus.teamproject.app.factory.EncryptionAlgorithmFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.security.Security;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -17,6 +19,10 @@ public class App {
     private Properties prop;
     private BufferedWriter resultWriter;
 
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
+
     public static void main(String[] args) {
         App app = new App();
         app.process();
@@ -26,7 +32,8 @@ public class App {
     public App() {
         try {
             logger.info("Started");
-            resultWriter = new BufferedWriter(new FileWriter("report.csv", true));
+            resultWriter = new BufferedWriter(new FileWriter("report.csv", false));
+            resultWriter.write("algo,filesize,time,path\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -44,9 +51,6 @@ public class App {
             }
             // Open the properties file
             prop = new Properties();
-//            Reader reader = new FileReader("/Users/maheshkanse/Documents/GitHub/EngineeringProject/target/classes/config.properties");
-//            prop.load(reader);
-//            reader.close();
 
             if(System.getenv("INPUT_DIR") != null) {
                 prop.setProperty("input_dir", System.getenv("INPUT_DIR"));
@@ -98,7 +102,7 @@ public class App {
                 EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
                 if(processor != null) {
                     Long startTime = System.currentTimeMillis();
-                    logger.info("Encrypting: " + path.toString());
+                    logger.info("Encrypting: " + path);
                     processor.encryptFile(path.toString(), encryptedFilePath);
 
                     logger.info("Decrypting: " + encryptedFilePath);
