@@ -2,10 +2,7 @@ package tus.teamproject.app.factory;
 
 import tus.teamproject.app.domain.Algorithms;
 import tus.teamproject.app.domain.EncryptionInterface;
-import tus.teamproject.app.processor.AESGCMEncryption;
-import tus.teamproject.app.processor.PBEDESEncryption;
-import tus.teamproject.app.processor.TripleDESEncryption;
-import tus.teamproject.app.processor.TwofishEncryption;
+import tus.teamproject.app.processor.*;
 
 import java.util.Objects;
 
@@ -19,6 +16,8 @@ public class EncryptionAlgorithmFactory {
             return new PBEDESEncryption();
         } else if (Objects.requireNonNull(algorithm) == Algorithms.TWOFISH) {
             return new TwofishEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.IDEA) {
+            return new IDEAEncryption();
         }
         return null;
     }
