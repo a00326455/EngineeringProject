@@ -16,6 +16,8 @@ public class EncryptionAlgorithmFactory {
             return new PBEDESEncryption();
         } else if (Objects.requireNonNull(algorithm) == Algorithms.TWOFISH) {
             return new TwofishEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.BLOWFISH) {
+            return new BlowfishEncryption();
         } else if (Objects.requireNonNull(algorithm) == Algorithms.IDEA) {
             return new IDEAEncryption();
         }
