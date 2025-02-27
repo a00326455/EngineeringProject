@@ -20,6 +20,16 @@ public class EncryptionAlgorithmFactory {
             return new BlowfishEncryption();
         } else if (Objects.requireNonNull(algorithm) == Algorithms.IDEA) {
             return new IDEAEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.CHACHA20) {
+            return new ChaCha20Encryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.SERPENT) {
+            return new SerpentEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.CAMELLIA) {
+            return new CamelliaEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.RSA) {
+            return new RSAEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.ECC) {
+            return new ECCEncryption();
         }
         return null;
     }

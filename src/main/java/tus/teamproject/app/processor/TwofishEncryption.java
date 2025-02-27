@@ -10,15 +10,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 
+/*
+ Twofish is a symmetric encryption algorithm and a successor to Blowfish.
+ It offers strong security and is suitable for both hardware and software implementations.
+ */
 public class TwofishEncryption implements EncryptionInterface {
 
     private SecretKey secretKey;
+    private static final int KEY_SIZE = 256;
 
     public TwofishEncryption(){
         KeyGenerator keyGen = null;
         try {
             keyGen = KeyGenerator.getInstance("Twofish");
-            keyGen.init(256);
+            keyGen.init(KEY_SIZE);
             secretKey = keyGen.generateKey();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -73,5 +78,10 @@ public class TwofishEncryption implements EncryptionInterface {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getKeyLength() {
+        return KEY_SIZE;
     }
 }

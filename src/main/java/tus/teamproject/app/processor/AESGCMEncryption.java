@@ -11,6 +11,10 @@ import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+/*
+AES is a symmetric encryption algorithm widely used for securing data.
+It supports key sizes of 128, 192, and 256 bits, providing strong security and performance.
+ */
 public class AESGCMEncryption implements EncryptionInterface {
 
     private static final String ALGORITHM = "AES/GCM/NoPadding";
@@ -95,5 +99,10 @@ public class AESGCMEncryption implements EncryptionInterface {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getKeyLength() {
+        return KEY_SIZE;
     }
 }

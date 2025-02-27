@@ -7,6 +7,7 @@ import tus.teamproject.app.factory.EncryptionAlgorithmFactory;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.Security;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -33,7 +34,7 @@ public class App {
         try {
             logger.info("Started");
             resultWriter = new BufferedWriter(new FileWriter("report.csv", false));
-            resultWriter.write("algo,filesize,time,path\n");
+            resultWriter.write("algo,keySize,fileSize,encryptedFileSize,time,path\n");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -109,7 +110,8 @@ public class App {
                     processor.decryptFile(encryptedFilePath, decryptedFilePath);
                     Long endTime = System.currentTimeMillis();
 
-                    String resultLine = algo + "," + fileSize + "," + (endTime - startTime) + "," + path + "\n";
+                    long encryptedFileSize = Files.size(Path.of(encryptedFilePath));
+                    String resultLine = algo + "," + processor.getKeyLength() + "," + fileSize + "," + encryptedFileSize + "," + (endTime - startTime) + "," + path + "\n";
                     logger.info(resultLine);
                     resultWriter.write(resultLine);
                 }

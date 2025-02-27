@@ -88,4 +88,9 @@ public class PBEDESEncryption implements EncryptionInterface {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public int getKeyLength() {
+        return 0;
+    }
 }

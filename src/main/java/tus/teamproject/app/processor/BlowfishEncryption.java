@@ -9,15 +9,20 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
 
+/*
+ Blowfish is a symmetric encryption algorithm known for its speed and effectiveness.
+ It uses a variable-length key, making it suitable for various applications.
+ */
 public class BlowfishEncryption implements EncryptionInterface {
 
     private SecretKey secretKey;
+    private static final int KEY_SIZE = 256;
 
     public BlowfishEncryption(){
         KeyGenerator keyGen = null;
         try {
             keyGen = KeyGenerator.getInstance("Blowfish");
-            keyGen.init(256);
+            keyGen.init(KEY_SIZE);
             secretKey = keyGen.generateKey();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -72,5 +77,10 @@ public class BlowfishEncryption implements EncryptionInterface {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getKeyLength() {
+        return KEY_SIZE;
     }
 }

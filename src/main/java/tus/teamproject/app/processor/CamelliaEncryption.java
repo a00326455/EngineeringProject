@@ -5,54 +5,42 @@ import tus.teamproject.app.domain.EncryptionInterface;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.NoSuchProviderException;
 
-public class TripleDESEncryption implements EncryptionInterface {
+/*
+ Camellia is a symmetric encryption algorithm that provides strong security and performance.
+ It is widely used in various applications, including SSL/TLS and VPNs.
+ */
+public class CamelliaEncryption implements EncryptionInterface {
+    private static final String ALGORITHM = "Camellia";
+    private static final int KEY_SIZE = 256;
+    private SecretKey key;
 
-    private static final String ALGORITHM = "DESede/CBC/PKCS5Padding";
-    private static final int KEY_SIZE = 168;
-    private static final int IV_SIZE = 8;
-    private static final int TAG_SIZE = 128;
-    private final SecretKey key;
-    private final byte[] iv;
-
-    public TripleDESEncryption(){
-        key = generateKey();
-        iv = generateIV();
-    }
-
-    private SecretKey generateKey() {
+    public CamelliaEncryption() {
+        // Generate a secret key
         KeyGenerator keyGen = null;
         try {
-            keyGen = KeyGenerator.getInstance("DESede");
+            keyGen = KeyGenerator.getInstance(ALGORITHM, "BC");
             keyGen.init(KEY_SIZE);
-            return keyGen.generateKey();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
+            key = keyGen.generateKey();
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        } catch (NoSuchProviderException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
-    private byte[] generateIV() {
-        byte[] iv = new byte[IV_SIZE];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
-        return iv;
-    }
-
+    @Override
     public void encryptFile(String inputFilePath, String outputFilePath) {
         try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fos.write(iv); // Write IV to the beginning of the file
 
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -71,15 +59,14 @@ public class TripleDESEncryption implements EncryptionInterface {
         }
     }
 
+    @Override
     public void decryptFile(String inputFilePath, String outputFilePath) {
         try{
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
+            cipher.init(Cipher.ENCRYPT_MODE, key);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
-             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fis.read(iv); // Read IV from the beginning of the file
+            FileOutputStream fos = new FileOutputStream(outputFilePath);
 
             byte[] buffer = new byte[1024];
             int bytesRead;

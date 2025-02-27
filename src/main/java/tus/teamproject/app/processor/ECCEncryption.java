@@ -1,58 +1,52 @@
 package tus.teamproject.app.processor;
 
+import org.bouncycastle.jce.spec.ECNamedCurveGenParameterSpec;
+import org.bouncycastle.jce.spec.IEKeySpec;
 import tus.teamproject.app.domain.EncryptionInterface;
 
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 
-public class TripleDESEncryption implements EncryptionInterface {
+/*
+ECC (Elliptic Curve Cryptography) is an asymmetric encryption algorithm that provides strong security with
+smaller key sizes compared to RSA. It is widely used in modern cryptographic protocols.
+ */
+public class ECCEncryption implements EncryptionInterface {
 
-    private static final String ALGORITHM = "DESede/CBC/PKCS5Padding";
-    private static final int KEY_SIZE = 168;
-    private static final int IV_SIZE = 8;
-    private static final int TAG_SIZE = 128;
-    private final SecretKey key;
-    private final byte[] iv;
+    private static final String ALGORITHM = "EC";
+    private static final int KEY_SIZE = 2048;
+    private KeyPair keyPair;
+    private PublicKey publicKey;
+    private PrivateKey privateKey;
 
-    public TripleDESEncryption(){
-        key = generateKey();
-        iv = generateIV();
-    }
-
-    private SecretKey generateKey() {
-        KeyGenerator keyGen = null;
+    public ECCEncryption(){
+        // Generate ECC key pair
         try {
-            keyGen = KeyGenerator.getInstance("DESede");
-            keyGen.init(KEY_SIZE);
-            return keyGen.generateKey();
-        } catch (NoSuchAlgorithmException e) {
+            keyPair = generateECKeyPair();
+            PublicKey publicKey = keyPair.getPublic();
+            PrivateKey privateKey = keyPair.getPrivate();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
-    private byte[] generateIV() {
-        byte[] iv = new byte[IV_SIZE];
-        SecureRandom random = new SecureRandom();
-        random.nextBytes(iv);
-        return iv;
+    public static KeyPair generateECKeyPair() throws Exception {
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(ALGORITHM, "BC");
+        keyPairGenerator.initialize(new ECNamedCurveGenParameterSpec("secp256r1"));
+        return keyPairGenerator.generateKeyPair();
     }
 
     public void encryptFile(String inputFilePath, String outputFilePath) {
         try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.ENCRYPT_MODE, key, ivSpec);
+            Cipher cipher = Cipher.getInstance("ECIES", "BC");
+            IEKeySpec spec = new IEKeySpec(keyPair.getPrivate(), keyPair.getPublic());
+            cipher.init(Cipher.ENCRYPT_MODE, spec);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fos.write(iv); // Write IV to the beginning of the file
 
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -73,13 +67,12 @@ public class TripleDESEncryption implements EncryptionInterface {
 
     public void decryptFile(String inputFilePath, String outputFilePath) {
         try{
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
-            IvParameterSpec ivSpec = new IvParameterSpec(iv);
-            cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+            Cipher cipher = Cipher.getInstance("ECIES", "BC");
+            IEKeySpec spec = new IEKeySpec(keyPair.getPrivate(), keyPair.getPublic());
+            cipher.init(Cipher.DECRYPT_MODE, spec);
 
             FileInputStream fis = new FileInputStream(inputFilePath);
-             FileOutputStream fos = new FileOutputStream(outputFilePath);
-            fis.read(iv); // Read IV from the beginning of the file
+            FileOutputStream fos = new FileOutputStream(outputFilePath);
 
             byte[] buffer = new byte[1024];
             int bytesRead;

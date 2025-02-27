@@ -12,12 +12,13 @@ import java.security.NoSuchAlgorithmException;
 public class IDEAEncryption implements EncryptionInterface {
 
     private SecretKey secretKey;
+    private static final int KEY_SIZE = 256;
 
     public IDEAEncryption(){
         KeyGenerator keyGen = null;
         try {
             keyGen = KeyGenerator.getInstance("IDEA");
-            keyGen.init(256);
+            keyGen.init(KEY_SIZE);
             secretKey = keyGen.generateKey();
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
@@ -72,5 +73,10 @@ public class IDEAEncryption implements EncryptionInterface {
         } catch(Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public int getKeyLength() {
+        return KEY_SIZE;
     }
 }

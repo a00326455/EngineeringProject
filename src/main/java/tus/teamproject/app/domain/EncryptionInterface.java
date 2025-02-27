@@ -7,4 +7,7 @@ public interface EncryptionInterface {
     public void encryptFile(String inputFilePath, String outputFilePath);
 
     public void decryptFile(String inputFilePath, String outputFilePath);
+
+    public int getKeyLength();
+
 }
