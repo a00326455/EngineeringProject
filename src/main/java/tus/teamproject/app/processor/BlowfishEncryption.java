@@ -39,8 +39,9 @@ public class BlowfishEncryption implements EncryptionInterface {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
+            byte[] output;
             while ((bytesRead = fis.read(buffer)) != -1) {
-                byte[] output = cipher.update(buffer, 0, bytesRead);
+                output = cipher.update(buffer, 0, bytesRead);
                 if (output != null) {
                     fos.write(output);
                 }
@@ -49,6 +50,8 @@ public class BlowfishEncryption implements EncryptionInterface {
             if (outputBytes != null) {
                 fos.write(outputBytes);
             }
+            fos.close();
+            fis.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,8 +67,9 @@ public class BlowfishEncryption implements EncryptionInterface {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
+            byte[] output;
             while ((bytesRead = fis.read(buffer)) != -1) {
-                byte[] output = cipher.update(buffer, 0, bytesRead);
+                output = cipher.update(buffer, 0, bytesRead);
                 if (output != null) {
                     fos.write(output);
                 }
@@ -74,6 +78,8 @@ public class BlowfishEncryption implements EncryptionInterface {
             if (outputBytes != null) {
                 fos.write(outputBytes);
             }
+            fos.close();
+            fis.close();
         } catch(Exception e) {
             e.printStackTrace();
         }

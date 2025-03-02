@@ -30,6 +30,10 @@ public class EncryptionAlgorithmFactory {
             return new RSAEncryption();
         } else if (Objects.requireNonNull(algorithm) == Algorithms.ECC) {
             return new ECCEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.DH_AES) {
+            return new DHAESEncryption();
+        } else if (Objects.requireNonNull(algorithm) == Algorithms.RSA_AES) {
+            return new RSAAESEncryption();
         }
         return null;
     }

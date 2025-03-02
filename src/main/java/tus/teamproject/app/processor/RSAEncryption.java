@@ -41,16 +41,15 @@ public class RSAEncryption implements EncryptionInterface {
 
             byte[] buffer = new byte[117];
             int bytesRead;
+            byte[] output;
             while ((bytesRead = fis.read(buffer)) != -1) {
-                byte[] output = cipher.doFinal(buffer);
+                output = cipher.doFinal(buffer);
                 if (output != null) {
                     fos.write(output);
                 }
             }
-//            byte[] outputBytes = cipher.doFinal();
-//            if (outputBytes != null) {
-//                fos.write(outputBytes);
-//            }
+            fos.close();
+            fis.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,16 +66,15 @@ public class RSAEncryption implements EncryptionInterface {
             // and public key size (128) for decryption.
             byte[] buffer = new byte[128];
             int bytesRead;
+            byte[] output;
             while ((bytesRead = fis.read(buffer)) != -1) {
-                byte[] output = cipher.doFinal(buffer);
+                output = cipher.doFinal(buffer); // Refer: https://security.stackexchange.com/questions/57205/why-is-rsa-decryption-slow
                 if (output != null) {
                     fos.write(output);
                 }
             }
-//            byte[] outputBytes = cipher.doFinal();
-//            if (outputBytes != null) {
-//                fos.write(outputBytes);
-//            }
+            fos.close();
+            fis.close();
         } catch(Exception e) {
             e.printStackTrace();
         }

@@ -56,7 +56,7 @@ public class App {
             if(System.getenv("INPUT_DIR") != null) {
                 prop.setProperty("input_dir", System.getenv("INPUT_DIR"));
             } else {
-                prop.setProperty("input_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/test_dir");
+                prop.setProperty("input_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/big_dir");
             }
             if(System.getenv("OUTPUT_DIR") != null){
                 prop.setProperty("output_dir", System.getenv("OUTPUT_DIR"));
@@ -116,6 +116,7 @@ public class App {
                     resultWriter.write(resultLine);
                 }
             }
+
         }catch(Exception e){
             e.printStackTrace();
             try {
