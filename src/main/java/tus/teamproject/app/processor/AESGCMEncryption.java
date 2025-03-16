@@ -49,7 +49,7 @@ public class AESGCMEncryption implements EncryptionInterface {
 
     public void encryptFile(String inputFilePath, String outputFilePath) {
         try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
             GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
             cipher.init(Cipher.ENCRYPT_MODE, key, spec);
 
@@ -79,7 +79,7 @@ public class AESGCMEncryption implements EncryptionInterface {
 
     public void decryptFile(String inputFilePath, String outputFilePath) {
         try{
-            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
             GCMParameterSpec spec = new GCMParameterSpec(TAG_SIZE, iv);
             cipher.init(Cipher.DECRYPT_MODE, key, spec);
 

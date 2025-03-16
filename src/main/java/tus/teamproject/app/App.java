@@ -9,6 +9,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.Security;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -95,18 +96,20 @@ public class App {
 
         try{
             long fileSize = Files.size(path.toPath());
+            //List<Algorithms> algorithms = List.of(Algorithms.ECC, Algorithms.AES_GCM); // for testing
 
             for(Algorithms algo : Algorithms.values()){
+            //for(Algorithms algo : algorithms){
                 String encryptedFilePath = prop.getProperty("output_dir") + "/encrypted_" + algo + "_" + path.getName();
                 String decryptedFilePath = prop.getProperty("output_dir") + "/decrypted_" + algo + "_" + path.getName();
 
                 EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
                 if(processor != null) {
                     Long startTime = System.currentTimeMillis();
-                    logger.info("Encrypting: " + path);
+                    logger.info(algo.toString() + " Encrypting: " + path);
                     processor.encryptFile(path.toString(), encryptedFilePath);
 
-                    logger.info("Decrypting: " + encryptedFilePath);
+                    logger.info(algo.toString() + " Decrypting: " + encryptedFilePath);
                     processor.decryptFile(encryptedFilePath, decryptedFilePath);
                     Long endTime = System.currentTimeMillis();
 

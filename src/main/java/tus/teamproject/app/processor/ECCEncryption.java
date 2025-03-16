@@ -15,7 +15,7 @@ smaller key sizes compared to RSA. It is widely used in modern cryptographic pro
  */
 public class ECCEncryption implements EncryptionInterface {
 
-    private static final String ALGORITHM = "EC";
+    private static final String ALGORITHM = "ECIES";
     private static final int KEY_SIZE = 2048;
     private KeyPair keyPair;
     private PublicKey publicKey;
