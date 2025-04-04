@@ -57,7 +57,7 @@ public class App {
             if(System.getenv("INPUT_DIR") != null) {
                 prop.setProperty("input_dir", System.getenv("INPUT_DIR"));
             } else {
-                prop.setProperty("input_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/big_dir");
+                prop.setProperty("input_dir", "/Users/maheshkanse/Documents/GitHub/EngineeringProject/small_dir");
             }
             if(System.getenv("OUTPUT_DIR") != null){
                 prop.setProperty("output_dir", System.getenv("OUTPUT_DIR"));
@@ -96,7 +96,10 @@ public class App {
 
         try{
             long fileSize = Files.size(path.toPath());
-            //List<Algorithms> algorithms = List.of(Algorithms.ECC, Algorithms.AES_GCM); // for testing
+            List<Algorithms> algorithms = List.of(Algorithms.ECC, Algorithms.AES_GCM,
+                    Algorithms.TRIPLE_DES,Algorithms.PBE_DES,Algorithms.TWOFISH,
+                    Algorithms.BLOWFISH,Algorithms.IDEA,Algorithms.CHACHA20,Algorithms.SERPENT,
+                    Algorithms.CAMELLIA,Algorithms.DH_AES,Algorithms.RSA_AES); // for testing
 
             for(Algorithms algo : Algorithms.values()){
             //for(Algorithms algo : algorithms){
@@ -105,18 +108,32 @@ public class App {
 
                 EncryptionInterface processor = EncryptionAlgorithmFactory.getEncryptionProcessor(algo);
                 if(processor != null) {
-                    Long startTime = System.currentTimeMillis();
-                    logger.info(algo.toString() + " Encrypting: " + path);
-                    processor.encryptFile(path.toString(), encryptedFilePath);
+                    for(int i = 0; i < 10; i++){
+                        Long startTime = System.currentTimeMillis();
+                        logger.info(algo.toString() + " Encrypting: " + path);
+                        processor.encryptFile(path.toString(), encryptedFilePath);
 
-                    logger.info(algo.toString() + " Decrypting: " + encryptedFilePath);
-                    processor.decryptFile(encryptedFilePath, decryptedFilePath);
-                    Long endTime = System.currentTimeMillis();
+                        logger.info(algo.toString() + " Decrypting: " + encryptedFilePath);
+                        processor.decryptFile(encryptedFilePath, decryptedFilePath);
+                        Long endTime = System.currentTimeMillis();
+                        long encryptedFileSize = Files.size(Path.of(encryptedFilePath));
 
-                    long encryptedFileSize = Files.size(Path.of(encryptedFilePath));
-                    String resultLine = algo + "," + processor.getKeyLength() + "," + fileSize + "," + encryptedFileSize + "," + (endTime - startTime) + "," + path + "\n";
-                    logger.info(resultLine);
-                    resultWriter.write(resultLine);
+                        String resultLine = algo + "," + processor.getKeyLength() + "," + fileSize + "," + encryptedFileSize + "," + (endTime - startTime) + "," + path + "\n";
+                        logger.info(resultLine);
+                        resultWriter.write(resultLine);
+                    }
+//                    Long startTime = System.currentTimeMillis();
+//                    logger.info(algo.toString() + " Encrypting: " + path);
+//                    processor.encryptFile(path.toString(), encryptedFilePath);
+//
+//                    logger.info(algo.toString() + " Decrypting: " + encryptedFilePath);
+//                    processor.decryptFile(encryptedFilePath, decryptedFilePath);
+//                    Long endTime = System.currentTimeMillis();
+//
+//                    long encryptedFileSize = Files.size(Path.of(encryptedFilePath));
+//                    String resultLine = algo + "," + processor.getKeyLength() + "," + fileSize + "," + encryptedFileSize + "," + (endTime - startTime) + "," + path + "\n";
+//                    logger.info(resultLine);
+//                    resultWriter.write(resultLine);
                 }
             }
 
